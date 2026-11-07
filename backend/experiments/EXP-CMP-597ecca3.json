@@ -1,0 +1,80 @@
+{
+  "experiment_id": "EXP-CMP-597ecca3",
+  "timestamp": "2026-11-04T06:39:32.553229+00:00",
+  "n_train_samples": 5000,
+  "n_test_samples": 5000,
+  "contamination": 0.08,
+  "isolation_forest": {
+    "hyperparameters": {
+      "n_estimators": 200,
+      "contamination": 0.08,
+      "random_state": 42
+    },
+    "train_duration_ms": 1905.03,
+    "inference_duration_ms": 125.44,
+    "flagged_count": 733,
+    "score_distribution": {
+      "mean": -0.4867,
+      "std": 0.0389,
+      "min": -0.6804,
+      "max": -0.4065
+    },
+    "benchmark_metrics": {
+      "tp": 184,
+      "fp": 549,
+      "fn": 150,
+      "tn": 4117,
+      "precision": 0.251,
+      "recall": 0.5509,
+      "f1_score": 0.3449,
+      "false_positive_rate": 0.1177,
+      "accuracy": 0.8602
+    },
+    "detection_delays": {
+      "SPIKE_FAULT": 0.0,
+      "FROZEN_SENSOR": 21.25,
+      "CROSS_SENSOR_MISMATCH": 1.17,
+      "DRIFT_FAULT": 2.33
+    }
+  },
+  "local_outlier_factor": {
+    "hyperparameters": {
+      "n_neighbors": 20,
+      "contamination": 0.08,
+      "novelty": true
+    },
+    "train_duration_ms": 579.73,
+    "inference_duration_ms": 443.08,
+    "flagged_count": 888,
+    "score_distribution": {
+      "mean": -7.0987,
+      "std": 24.5286,
+      "min": -184.6899,
+      "max": -0.9441
+    },
+    "benchmark_metrics": {
+      "tp": 279,
+      "fp": 609,
+      "fn": 55,
+      "tn": 4057,
+      "precision": 0.3142,
+      "recall": 0.8353,
+      "f1_score": 0.4566,
+      "false_positive_rate": 0.1305,
+      "accuracy": 0.8672
+    },
+    "detection_delays": {
+      "SPIKE_FAULT": 0.0,
+      "FROZEN_SENSOR": 7.25,
+      "CROSS_SENSOR_MISMATCH": 0.67,
+      "DRIFT_FAULT": 1.33
+    }
+  },
+  "consensus_analysis": {
+    "both_flagged": 522,
+    "if_only": 211,
+    "lof_only": 366,
+    "neither_flagged": 3901,
+    "overall_agreement_rate": 0.8846
+  }
+}

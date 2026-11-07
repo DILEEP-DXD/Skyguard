@@ -1,0 +1,271 @@
+{
+  "experiment_id": "EXP-KM-9d01c3c2",
+  "timestamp": "2026-11-03T10:40:08.965576+00:00",
+  "k_range": [
+    2,
+    6
+  ],
+  "results": [
+    {
+      "k": 2,
+      "inertia": 43898.38,
+      "silhouette_score": 0.2408,
+      "davies_bouldin_index": 1.6207,
+      "calinski_harabasz_index": 354.8,
+      "train_duration_ms": 177.32,
+      "cluster_distribution": [
+        2294,
+        2706
+      ],
+      "centroids": [
+        {
+          "cluster_id": 0,
+          "size": 2294,
+          "percentage": 45.88,
+          "mean_temperature": 26.76,
+          "mean_pressure": 1012.76,
+          "mean_humidity": 50.48,
+          "mean_delta_temp": 0.0139
+        },
+        {
+          "cluster_id": 1,
+          "size": 2706,
+          "percentage": 54.12,
+          "mean_temperature": 16.65,
+          "mean_pressure": 1013.66,
+          "mean_humidity": 70.72,
+          "mean_delta_temp": -0.0004
+        }
+      ]
+    },
+    {
+      "k": 3,
+      "inertia": 39117.64,
+      "silhouette_score": 0.2037,
+      "davies_bouldin_index": 1.643,
+      "calinski_harabasz_index": 267.67,
+      "train_duration_ms": 79.63,
+      "cluster_distribution": [
+        2014,
+        2110,
+        876
+      ],
+      "centroids": [
+        {
+          "cluster_id": 0,
+          "size": 2014,
+          "percentage": 40.28,
+          "mean_temperature": 27.45,
+          "mean_pressure": 1012.98,
+          "mean_humidity": 49.08,
+          "mean_delta_temp": 0.0066
+        },
+        {
+          "cluster_id": 1,
+          "size": 2110,
+          "percentage": 42.2,
+          "mean_temperature": 17.17,
+          "mean_pressure": 1015.48,
+          "mean_humidity": 69.71,
+          "mean_delta_temp": -0.001
+        },
+        {
+          "cluster_id": 2,
+          "size": 876,
+          "percentage": 17.52,
+          "mean_temperature": 17.84,
+          "mean_pressure": 1008.48,
+          "mean_humidity": 68.31,
+          "mean_delta_temp": 0.0197
+        }
+      ]
+    },
+    {
+      "k": 4,
+      "inertia": 38363.77,
+      "silhouette_score": 0.1215,
+      "davies_bouldin_index": 2.1914,
+      "calinski_harabasz_index": 184.91,
+      "train_duration_ms": 67.64,
+      "cluster_distribution": [
+        903,
+        1483,
+        1597,
+        1017
+      ],
+      "centroids": [
+        {
+          "cluster_id": 0,
+          "size": 903,
+          "percentage": 18.06,
+          "mean_temperature": 16.37,
+          "mean_pressure": 1014.57,
+          "mean_humidity": 72.06,
+          "mean_delta_temp": -0.3354
+        },
+        {
+          "cluster_id": 1,
+          "size": 1483,
+          "percentage": 29.66,
+          "mean_temperature": 16.64,
+          "mean_pressure": 1014.32,
+          "mean_humidity": 70.44,
+          "mean_delta_temp": 0.1627
+        },
+        {
+          "cluster_id": 2,
+          "size": 1597,
+          "percentage": 31.94,
+          "mean_temperature": 27.91,
+          "mean_pressure": 1014.24,
+          "mean_humidity": 48.16,
+          "mean_delta_temp": 0.0201
+        },
+        {
+          "cluster_id": 3,
+          "size": 1017,
+          "percentage": 20.34,
+          "mean_temperature": 22.73,
+          "mean_pressure": 1009.27,
+          "mean_humidity": 58.49,
+          "mean_delta_temp": 0.0107
+        }
+      ]
+    },
+    {
+      "k": 5,
+      "inertia": 33915.22,
+      "silhouette_score": 0.1706,
+      "davies_bouldin_index": 1.9943,
+      "calinski_harabasz_index": 192.99,
+      "train_duration_ms": 57.16,
+      "cluster_distribution": [
+        678,
+        818,
+        1963,
+        766,
+        775
+      ],
+      "centroids": [
+        {
+          "cluster_id": 0,
+          "size": 678,
+          "percentage": 13.56,
+          "mean_temperature": 16.58,
+          "mean_pressure": 1008.32,
+          "mean_humidity": 70.85,
+          "mean_delta_temp": 0.0131
+        },
+        {
+          "cluster_id": 1,
+          "size": 818,
+          "percentage": 16.36,
+          "mean_temperature": 26.8,
+          "mean_pressure": 1017.61,
+          "mean_humidity": 50.55,
+          "mean_delta_temp": -0.0081
+        },
+        {
+          "cluster_id": 2,
+          "size": 1963,
+          "percentage": 39.26,
+          "mean_temperature": 16.65,
+          "mean_pressure": 1015.4,
+          "mean_humidity": 70.69,
+          "mean_delta_temp": 0.0108
+        },
+        {
+          "cluster_id": 3,
+          "size": 766,
+          "percentage": 15.32,
+          "mean_temperature": 25.14,
+          "mean_pressure": 1010.4,
+          "mean_humidity": 54.08,
+          "mean_delta_temp": -0.1992
+        },
+        {
+          "cluster_id": 4,
+          "size": 775,
+          "percentage": 15.5,
+          "mean_temperature": 28.26,
+          "mean_pressure": 1010.85,
+          "mean_humidity": 47.03,
+          "mean_delta_temp": 0.1662
+        }
+      ]
+    },
+    {
+      "k": 6,
+      "inertia": 32042.95,
+      "silhouette_score": 0.1514,
+      "davies_bouldin_index": 1.9281,
+      "calinski_harabasz_index": 176.45,
+      "train_duration_ms": 100.39,
+      "cluster_distribution": [
+        1294,
+        809,
+        486,
+        840,
+        874,
+        697
+      ],
+      "centroids": [
+        {
+          "cluster_id": 0,
+          "size": 1294,
+          "percentage": 25.88,
+          "mean_temperature": 27.64,
+          "mean_pressure": 1010.71,
+          "mean_humidity": 48.64,
+          "mean_delta_temp": 0.0017
+        },
+        {
+          "cluster_id": 1,
+          "size": 809,
+          "percentage": 16.18,
+          "mean_temperature": 16.19,
+          "mean_pressure": 1015.54,
+          "mean_humidity": 72.25,
+          "mean_delta_temp": -0.2908
+        },
+        {
+          "cluster_id": 2,
+          "size": 486,
+          "percentage": 9.72,
+          "mean_temperature": 20.51,
+          "mean_pressure": 1015.25,
+          "mean_humidity": 62.21,
+          "mean_delta_temp": 0.4204
+        },
+        {
+          "cluster_id": 3,
+          "size": 840,
+          "percentage": 16.8,
+          "mean_temperature": 18.02,
+          "mean_pressure": 1008.86,
+          "mean_humidity": 68.04,
+          "mean_delta_temp": -0.0271
+        },
+        {
+          "cluster_id": 4,
+          "size": 874,
+          "percentage": 17.48,
+          "mean_temperature": 16.03,
+          "mean_pressure": 1014.94,
+          "mean_humidity": 71.67,
+          "mean_delta_temp": 0.1496
+        },
+        {
+          "cluster_id": 5,
+          "size": 697,
+          "percentage": 13.94,
+          "mean_temperature": 27.17,
+          "mean_pressure": 1017.65,
+          "mean_humidity": 49.84,
+          "mean_delta_temp": -0.0547
+        }
+      ]
+    }
+  ],
+  "interpretative_guidance": "Higher Silhouette and Calinski-Harabasz indicate better separation; lower Davies-Bouldin indicates tighter clusters. The elbow in Inertia often reflects the inflection point of operating regimes."
+}

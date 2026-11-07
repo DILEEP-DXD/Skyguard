@@ -1,0 +1,170 @@
+{
+  "benchmark_id": "BMK-6e423f7a",
+  "timestamp": "2026-11-03T09:59:51.225192+00:00",
+  "total_test_observations": 5000,
+  "total_fault_observations": 632,
+  "fault_percentage": 12.64,
+  "overall_performance": {
+    "isolation_forest": {
+      "tp": 383,
+      "fp": 534,
+      "fn": 249,
+      "tn": 3834,
+      "precision": 0.4177,
+      "recall": 0.606,
+      "f1_score": 0.4945,
+      "false_positive_rate": 0.1223,
+      "accuracy": 0.8434
+    },
+    "local_outlier_factor": {
+      "tp": 524,
+      "fp": 607,
+      "fn": 108,
+      "tn": 3761,
+      "precision": 0.4633,
+      "recall": 0.8291,
+      "f1_score": 0.5944,
+      "false_positive_rate": 0.139,
+      "accuracy": 0.857
+    },
+    "ensemble_max_pooling": {
+      "tp": 531,
+      "fp": 807,
+      "fn": 101,
+      "tn": 3561,
+      "precision": 0.3969,
+      "recall": 0.8402,
+      "f1_score": 0.5391,
+      "false_positive_rate": 0.1848,
+      "accuracy": 0.8184
+    }
+  },
+  "per_fault_breakdown": {
+    "SPIKE_FAULT": {
+      "n_fault_rows": 39,
+      "isolation_forest": {
+        "tp": 37,
+        "recall": 0.9487
+      },
+      "lof": {
+        "tp": 39,
+        "recall": 1.0
+      },
+      "ensemble": {
+        "tp": 39,
+        "recall": 1.0
+      }
+    },
+    "FROZEN_SENSOR": {
+      "n_fault_rows": 126,
+      "isolation_forest": {
+        "tp": 9,
+        "recall": 0.0714
+      },
+      "lof": {
+        "tp": 99,
+        "recall": 0.7857
+      },
+      "ensemble": {
+        "tp": 99,
+        "recall": 0.7857
+      }
+    },
+    "DRIFT_FAULT": {
+      "n_fault_rows": 112,
+      "isolation_forest": {
+        "tp": 83,
+        "recall": 0.7411
+      },
+      "lof": {
+        "tp": 98,
+        "recall": 0.875
+      },
+      "ensemble": {
+        "tp": 100,
+        "recall": 0.8929
+      }
+    },
+    "CROSS_SENSOR_MISMATCH": {
+      "n_fault_rows": 66,
+      "isolation_forest": {
+        "tp": 61,
+        "recall": 0.9242
+      },
+      "lof": {
+        "tp": 61,
+        "recall": 0.9242
+      },
+      "ensemble": {
+        "tp": 61,
+        "recall": 0.9242
+      }
+    },
+    "SENSOR_BIAS": {
+      "n_fault_rows": 96,
+      "isolation_forest": {
+        "tp": 63,
+        "recall": 0.6562
+      },
+      "lof": {
+        "tp": 77,
+        "recall": 0.8021
+      },
+      "ensemble": {
+        "tp": 79,
+        "recall": 0.8229
+      }
+    },
+    "ABNORMAL_NOISE": {
+      "n_fault_rows": 75,
+      "isolation_forest": {
+        "tp": 67,
+        "recall": 0.8933
+      },
+      "lof": {
+        "tp": 73,
+        "recall": 0.9733
+      },
+      "ensemble": {
+        "tp": 73,
+        "recall": 0.9733
+      }
+    },
+    "GRADUAL_DEGRADATION": {
+      "n_fault_rows": 118,
+      "isolation_forest": {
+        "tp": 63,
+        "recall": 0.5339
+      },
+      "lof": {
+        "tp": 77,
+        "recall": 0.6525
+      },
+      "ensemble": {
+        "tp": 80,
+        "recall": 0.678
+      }
+    }
+  },
+  "detection_delays": {
+    "isolation_forest": {
+      "SPIKE_FAULT": 0.0,
+      "DRIFT_FAULT": 4.67,
+      "CROSS_SENSOR_MISMATCH": 1.0,
+      "SENSOR_BIAS": 0.0,
+      "ABNORMAL_NOISE": 0.5,
+      "GRADUAL_DEGRADATION": 2.67,
+      "FROZEN_SENSOR": 21.5
+    },
+    "local_outlier_factor": {
+      "SPIKE_FAULT": 0.0,
+      "DRIFT_FAULT": 3.67,
+      "CROSS_SENSOR_MISMATCH": 1.0,
+      "SENSOR_BIAS": 0.0,
+      "ABNORMAL_NOISE": 0.5,
+      "GRADUAL_DEGRADATION": 7.0,
+      "FROZEN_SENSOR": 6.75
+    }
+  },
+  "benchmark_disclaimer": "These metrics originate from offline controlled benchmark simulations and represent theoretical detector capacity under known hardware failure models."
+}

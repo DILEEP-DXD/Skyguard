@@ -1,0 +1,156 @@
+/* ── SkyGuard Global Styles ───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0d1117;
+  --bg2:       #161b22;
+  --bg3:       #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --accent:    #58a6ff;
+  --green:     #3fb950;
+  --yellow:    #d29922;
+  --red:       #f85149;
+  --purple:    #bc8cff;
+  --orange:    #ffa657;
+  --radius:    8px;
+  --shadow:    0 4px 16px rgba(0,0,0,0.4);
+}
+
+body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; font-size: 14px; }
+
+/* ── App shell ─────────────────────────────────────────────────── */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; background: var(--bg2); border-bottom: 1px solid var(--border);
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { font-size: 28px; }
+.app-header h1 { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.3px; }
+.app-header p  { font-size: 11px; color: var(--muted); }
+
+/* WS badge */
+.ws-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--bg3);
+}
+.ws-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.ws-connected .ws-dot    { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+.ws-error .ws-dot         { background: var(--red); }
+.ws-reconnecting .ws-dot { background: var(--yellow); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* ── Tabs ──────────────────────────────────────────────────────── */
+.tab-nav {
+  display: flex; gap: 2px; padding: 0 24px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  padding: 10px 20px; border: none; background: transparent;
+  color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500;
+  border-bottom: 2px solid transparent; transition: all .2s;
+}
+.tab-btn:hover  { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Main content ──────────────────────────────────────────────── */
+.app-main { flex: 1; padding: 20px 24px; overflow-x: hidden; }
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+}
+.card-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+
+/* ── Grid layouts ──────────────────────────────────────────────── */
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+
+@media(max-width:900px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Chart wrapper ─────────────────────────────────────────────── */
+.chart-wrap { height: 200px; }
+
+/* ── Fault buttons ─────────────────────────────────────────────── */
+.fault-section { margin-top: 20px; }
+.fault-section h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing:.5px; margin-bottom: 12px; }
+.fault-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.fault-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: var(--radius); border: 1px solid;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.fault-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+.fault-btn:active { transform: translateY(0); }
+.fault-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.fault-btn.spike  { background:rgba(248,81,73,.12);  border-color:var(--red);    color:var(--red);    }
+.fault-btn.freeze { background:rgba(88,166,255,.12); border-color:var(--accent); color:var(--accent); }
+.fault-btn.drift  { background:rgba(210,153,34,.12); border-color:var(--yellow); color:var(--yellow); }
+.fault-btn.mismatch{ background:rgba(188,140,255,.12);border-color:var(--purple);color:var(--purple); }
+.fault-active-badge {
+  margin-left: 12px; padding: 4px 10px; border-radius: 4px;
+  background: rgba(248,81,73,.2); border: 1px solid var(--red);
+  color: var(--red); font-size: 11px; font-weight: 700; animation: fadein .3s;
+}
+@keyframes fadein { from{opacity:0} to{opacity:1} }
+
+/* ── Alert feed ────────────────────────────────────────────────── */
+.alert-feed { margin-top: 20px; }
+.alert-feed h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing:.5px; margin-bottom: 12px; }
+.alert-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.alert-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border-radius: 6px; border-left: 3px solid;
+  background: var(--bg3); animation: slidein .25s;
+}
+@keyframes slidein { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+.alert-item.CRITICAL { border-color: var(--red); }
+.alert-item.WARNING  { border-color: var(--yellow); }
+.alert-icon { font-size: 16px; flex-shrink: 0; }
+.alert-body { flex: 1; min-width: 0; }
+.alert-title { font-weight: 700; font-size: 13px; }
+.alert-item.CRITICAL .alert-title { color: var(--red); }
+.alert-item.WARNING  .alert-title { color: var(--yellow); }
+.alert-msg   { color: var(--muted); font-size: 11px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.alert-time  { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.no-alerts   { color: var(--muted); font-size: 13px; padding: 16px 0; text-align: center; }
+
+/* ── Metric cards ──────────────────────────────────────────────── */
+.metric-cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.metric-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; min-width: 140px;
+}
+.metric-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing:.5px; }
+.metric-value { font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+.metric-desc  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ── Model comparison table ────────────────────────────────────── */
+.model-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.model-table th { text-align:left; padding: 8px 12px; background: var(--bg3); color: var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
+.model-table td { padding: 8px 12px; border-top: 1px solid var(--border); }
+.model-table tr:hover td { background: var(--bg3); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.badge-green  { background:rgba(63,185,80,.15);  color:var(--green);  }
+.badge-yellow { background:rgba(210,153,34,.15); color:var(--yellow); }
+.badge-red    { background:rgba(248,81,73,.15);  color:var(--red);    }
+.badge-purple { background:rgba(188,140,255,.15);color:var(--purple); }
+
+/* ── Scatter plot tooltip ──────────────────────────────────────── */
+.scatter-tooltip {
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 8px 10px; border-radius: 6px; font-size: 12px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

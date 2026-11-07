@@ -1,0 +1,33 @@
+{
+  "experiment_id": "EXP-DBSCAN-KM-42ea77fa",
+  "sample_size": 200,
+  "kmeans": {
+    "paradigm": "Centroid-based geometric partitioning",
+    "k": 3,
+    "duration_ms": 38.17,
+    "silhouette_score": 0.2213,
+    "davies_bouldin_index": 1.5368,
+    "inertia": 1454.29,
+    "clusters_discovered": 3,
+    "noise_handling": "Forces all points into nearest centroid (no noise class)"
+  },
+  "dbscan": {
+    "paradigm": "Density-based connectivity partitioning",
+    "hyperparameters": {
+      "eps": 2.5,
+      "min_samples": 5
+    },
+    "duration_ms": 3.05,
+    "clusters_discovered": 1,
+    "noise_points": 10,
+    "noise_percentage": 5.0,
+    "core_silhouette_score": 0.0,
+    "core_davies_bouldin": 0.0,
+    "noise_handling": "Explicit noise class (-1) for low-density spatial outliers"
+  },
+  "comparative_insights": [
+    "K-Means enforces spherical clusters and assigns every observation to a regime.",
+    "DBSCAN allows arbitrary manifold shapes and explicitly tags peripheral points as noise.",
+    "At eps=2.5, DBSCAN isolated 10 points as spatial anomalies."
+  ]
+}

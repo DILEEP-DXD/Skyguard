@@ -1,0 +1,124 @@
+{
+  "experiment_id": "EXP-ABL-8e536cdf",
+  "timestamp": "2026-11-03T17:56:36.476409+00:00",
+  "ablation_results": [
+    {
+      "subset_id": "RAW_3",
+      "name": "Raw Sensor Readings",
+      "feature_count": 3,
+      "features": [
+        "temperature",
+        "pressure",
+        "humidity"
+      ],
+      "train_duration_ms": 51.82,
+      "inference_duration_ms": 47.46,
+      "overall_metrics": {
+        "tp": 221,
+        "fp": 327,
+        "fn": 113,
+        "tn": 4339,
+        "precision": 0.4033,
+        "recall": 0.6617,
+        "f1_score": 0.5011,
+        "false_positive_rate": 0.0701,
+        "accuracy": 0.912
+      },
+      "per_fault_recall": {
+        "SPIKE_FAULT": 1.0,
+        "FROZEN_SENSOR": 0.0632,
+        "DRIFT_FAULT": 0.8393,
+        "CROSS_SENSOR_MISMATCH": 0.92
+      },
+      "detection_delays": {
+        "SPIKE_FAULT": 0.0,
+        "FROZEN_SENSOR": 13.75,
+        "CROSS_SENSOR_MISMATCH": 0.83,
+        "DRIFT_FAULT": 1.33
+      }
+    },
+    {
+      "subset_id": "RAW_DELTA_6",
+      "name": "Raw + First-Order Differences",
+      "feature_count": 6,
+      "features": [
+        "temperature",
+        "pressure",
+        "humidity",
+        "delta_temp",
+        "delta_pressure",
+        "delta_humidity"
+      ],
+      "train_duration_ms": 91.7,
+      "inference_duration_ms": 86.05,
+      "overall_metrics": {
+        "tp": 199,
+        "fp": 361,
+        "fn": 135,
+        "tn": 4305,
+        "precision": 0.3554,
+        "recall": 0.5958,
+        "f1_score": 0.4452,
+        "false_positive_rate": 0.0774,
+        "accuracy": 0.9008
+      },
+      "per_fault_recall": {
+        "SPIKE_FAULT": 1.0,
+        "FROZEN_SENSOR": 0.0316,
+        "DRIFT_FAULT": 0.6696,
+        "CROSS_SENSOR_MISMATCH": 0.92
+      },
+      "detection_delays": {
+        "SPIKE_FAULT": 0.0,
+        "FROZEN_SENSOR": 19.25,
+        "CROSS_SENSOR_MISMATCH": 1.0,
+        "DRIFT_FAULT": 1.33
+      }
+    },
+    {
+      "subset_id": "FULL_12",
+      "name": "Full Temporal Window Feature Set",
+      "feature_count": 12,
+      "features": [
+        "temperature",
+        "pressure",
+        "humidity",
+        "delta_temp",
+        "delta_pressure",
+        "delta_humidity",
+        "roll_mean_temp",
+        "roll_mean_pressure",
+        "roll_mean_humidity",
+        "roll_std_temp",
+        "roll_std_pressure",
+        "roll_std_humidity"
+      ],
+      "train_duration_ms": 325.5,
+      "inference_duration_ms": 293.49,
+      "overall_metrics": {
+        "tp": 279,
+        "fp": 609,
+        "fn": 55,
+        "tn": 4057,
+        "precision": 0.3142,
+        "recall": 0.8353,
+        "f1_score": 0.4566,
+        "false_positive_rate": 0.1305,
+        "accuracy": 0.8672
+      },
+      "per_fault_recall": {
+        "SPIKE_FAULT": 1.0,
+        "FROZEN_SENSOR": 0.6947,
+        "DRIFT_FAULT": 0.8036,
+        "CROSS_SENSOR_MISMATCH": 0.9467
+      },
+      "detection_delays": {
+        "SPIKE_FAULT": 0.0,
+        "FROZEN_SENSOR": 7.25,
+        "CROSS_SENSOR_MISMATCH": 0.67,
+        "DRIFT_FAULT": 1.33
+      }
+    }
+  ],
+  "academic_conclusion": "Temporal rolling features (especially roll_std) are essential to detecting FROZEN_SENSOR flatlines. Without second-order dispersion metrics, frozen sensors residing inside standard physical ranges remain virtually invisible to static density estimators."
+}

@@ -1,0 +1,47 @@
+{
+  "experiment_id": "EXP-STAB-96238000",
+  "timestamp": "2026-11-04T06:48:47.103901+00:00",
+  "k": 3,
+  "n_runs": 2,
+  "seeds": [
+    42,
+    101
+  ],
+  "runs": [
+    {
+      "seed": 42,
+      "inertia": 39117.64,
+      "duration_ms": 82.32,
+      "cluster_sizes": [
+        2014,
+        2110,
+        876
+      ]
+    },
+    {
+      "seed": 101,
+      "inertia": 39809.0,
+      "duration_ms": 91.4,
+      "cluster_sizes": [
+        1473,
+        2367,
+        1160
+      ]
+    }
+  ],
+  "pairwise_ari_matrix": [
+    [
+      1.0,
+      0.4018
+    ],
+    [
+      0.4018,
+      1.0
+    ]
+  ],
+  "summary": {
+    "mean_ari": 0.4018,
+    "std_ari": 0.0,
+    "stability_category": "LOW_STABILITY"
+  }
+}
