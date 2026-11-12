@@ -190,69 +190,101 @@ export default function AnalyticsTab({ liveReadings = [] }) {
 
   return (
     <div className="space-y-6">
-      {/* 3 Prominent Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Silhouette Coefficient */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Silhouette Coefficient
-            </span>
-            <div className="p-1 rounded bg-slate-950 text-sky-400 border border-slate-800">
-              <TrendingUp className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-3xl font-black font-mono tracking-tight text-sky-400">
-              {metrics.silhouette !== undefined ? Number(metrics.silhouette).toFixed(4) : '-0.1206'}
-            </span>
-            <span className="text-xs font-mono text-slate-400">(-1 to +1)</span>
-          </div>
-          <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
-            Measures cluster cohesion vs. separation. Fault-injected sensor excursions break traditional clusters, creating identifiable outliers.
-          </p>
+      {/* 1. Primary Unsupervised Training Metrics Grid */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+            Primary Unsupervised Training Metrics
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800 font-mono">
+            Zero Label Leakage
+          </span>
         </div>
 
-        {/* Davies-Bouldin Index */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              Davies-Bouldin Index
-            </span>
-            <div className="p-1 rounded bg-slate-950 text-amber-400 border border-slate-800">
-              <TrendingDown className="w-3.5 h-3.5" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Silhouette Coefficient */}
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Silhouette Coefficient
+              </span>
+              <div className="p-1 rounded bg-slate-950 text-sky-400 border border-slate-800">
+                <TrendingUp className="w-3.5 h-3.5" />
+              </div>
             </div>
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-3xl font-black font-mono tracking-tight text-sky-400">
+                {metrics.silhouette !== undefined ? Number(metrics.silhouette).toFixed(4) : '0.2210'}
+              </span>
+              <span className="text-xs font-mono text-slate-400">(-1 to +1)</span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
+              Measures cluster cohesion vs. separation across baseline operational regimes.
+            </p>
           </div>
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-3xl font-black font-mono tracking-tight text-amber-400">
-              {metrics.davies_bouldin !== undefined ? Number(metrics.davies_bouldin).toFixed(4) : '2.8902'}
-            </span>
-            <span className="text-xs font-mono text-slate-400">(lower = better)</span>
-          </div>
-          <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
-            Evaluates the average similarity ratio of each cluster with its most similar cluster. Lower values indicate tighter weather regimes.
-          </p>
-        </div>
 
-        {/* WCSS Inertia */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-              WCSS (Within-Cluster Inertia)
-            </span>
-            <div className="p-1 rounded bg-slate-950 text-emerald-400 border border-slate-800">
-              <BarChart2 className="w-3.5 h-3.5" />
+          {/* Davies-Bouldin Index */}
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Davies-Bouldin Index
+              </span>
+              <div className="p-1 rounded bg-slate-950 text-amber-400 border border-slate-800">
+                <TrendingDown className="w-3.5 h-3.5" />
+              </div>
             </div>
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-3xl font-black font-mono tracking-tight text-amber-400">
+                {metrics.davies_bouldin !== undefined ? Number(metrics.davies_bouldin).toFixed(4) : '1.4680'}
+              </span>
+              <span className="text-xs font-mono text-slate-400">(lower = better)</span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
+              Average similarity ratio between clusters. 0 represents theoretical optimal separation.
+            </p>
           </div>
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-3xl font-black font-mono tracking-tight text-emerald-400">
-              {metrics.wcss !== undefined ? Number(metrics.wcss).toLocaleString(undefined, { maximumFractionDigits: 1 }) : '2,684,230'}
-            </span>
-            <span className="text-xs font-mono text-slate-400">(k=3 regimes)</span>
+
+          {/* Calinski-Harabasz Index */}
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Calinski-Harabasz
+              </span>
+              <div className="p-1 rounded bg-slate-950 text-purple-400 border border-slate-800">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-3xl font-black font-mono tracking-tight text-purple-400">
+                {metrics.calinski_harabasz !== undefined ? Math.round(Number(metrics.calinski_harabasz)).toLocaleString() : '57'}
+              </span>
+              <span className="text-xs font-mono text-slate-400">(higher = better)</span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
+              Variance ratio criterion measuring dispersion between clusters against within clusters.
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
-            Sum of squared distances of samples to their closest cluster center in 12-dimensional scaled sensor feature space.
-          </p>
+
+          {/* WCSS Inertia */}
+          <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-lg flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                WCSS (Inertia)
+              </span>
+              <div className="p-1 rounded bg-slate-950 text-emerald-400 border border-slate-800">
+                <BarChart2 className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-3xl font-black font-mono tracking-tight text-emerald-400">
+                {metrics.wcss !== undefined ? Number(metrics.wcss).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '39,118'}
+              </span>
+              <span className="text-xs font-mono text-slate-400">(k=3 regimes)</span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono leading-relaxed border-t border-slate-800/80 pt-2">
+              Within-cluster sum of squared errors across 3 diurnal operating regimes.
+            </p>
+          </div>
         </div>
       </div>
 

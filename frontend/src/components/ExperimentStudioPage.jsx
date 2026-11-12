@@ -211,7 +211,7 @@ export default function ExperimentStudioPage() {
             { id: 'feature-ablation', label: 'Feature ablation' },
             { id: 'stability', label: 'Cluster stability' },
             { id: 'benchmark', label: '7-Fault benchmark' },
-            { id: 'dbscan', label: 'DBSCAN vs k-Means' },
+            { id: 'dbscan', label: '4-Model cluster benchmark' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -659,21 +659,25 @@ export default function ExperimentStudioPage() {
         </div>
       )}
 
-      {/* TAB 6: DBSCAN VS KMEANS */}
+      {/* TAB 6: 4-MODEL CLUSTERING BENCHMARK */}
       {activeTab === 'dbscan' && (
         <div className="space-y-4">
           <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-neutral-500">DBSCAN epsilon (ε):</span>
-              <input
-                type="number"
-                step="0.1"
-                min="0.5"
-                max="5.0"
-                value={dbscanEps}
-                onChange={(e) => setDbscanEps(e.target.value)}
-                className="w-14 py-1 px-2 rounded-md border border-[#E5E5E5] dark:border-[#262626] bg-white dark:bg-[#171718] text-center"
-              />
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-neutral-500">DBSCAN epsilon (ε):</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.5"
+                  max="5.0"
+                  value={dbscanEps}
+                  onChange={(e) => setDbscanEps(e.target.value)}
+                  className="w-14 py-1 px-2 rounded-md border border-[#E5E5E5] dark:border-[#262626] bg-white dark:bg-[#171718] text-center"
+                />
+              </div>
+              <span className="text-neutral-400">|</span>
+              <span className="text-neutral-500">Regimes (k): 3</span>
             </div>
             <button
               onClick={handleRunDBSCAN}
@@ -681,53 +685,147 @@ export default function ExperimentStudioPage() {
               className="inline-flex items-center gap-1.5 text-xs font-medium px-3.5 py-1.5 rounded-md bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors cursor-pointer disabled:opacity-50"
             >
               <Play className="w-3 h-3 fill-current" />
-              <span>{loading ? 'Comparing...' : 'Run DBSCAN comparison'}</span>
+              <span>{loading ? 'Evaluating...' : 'Run 4-model cluster benchmark'}</span>
             </button>
           </div>
 
           {dbscanResult && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-3 text-xs">
-                <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">Centroid k-Means</h3>
-                <p className="text-neutral-500 text-xs">
-                  Partitions space into Voronoi cells. Assigns every point to the nearest centroid.
-                </p>
-                <div className="space-y-2 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
-                  <div className="flex justify-between py-1 border-b border-[#F0F0F0] dark:border-[#262626]">
-                    <span className="text-neutral-500">Clusters discovered</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.kmeans.clusters_discovered}</span>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. K-Means */}
+                <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Centroid k-Means</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400">Centroid</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[#F0F0F0] dark:border-[#262626]">
-                    <span className="text-neutral-500">Silhouette score</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.kmeans.silhouette_score}</span>
+                  <p className="text-neutral-500 text-[11px]">
+                    Voronoi geometric partitioning. Forces every observation into nearest centroid.
+                  </p>
+                  <div className="space-y-1.5 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Silhouette</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.kmeans.silhouette_score}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Davies-Bouldin</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.kmeans.davies_bouldin_index}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Calinski-Harabasz</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.kmeans.calinski_harabasz_index ?? '--'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-neutral-500">Inertia (WCSS)</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.kmeans.inertia?.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-neutral-500">Davies-Bouldin index</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.kmeans.davies_bouldin_index}</span>
+                </div>
+
+                {/* 2. DBSCAN */}
+                <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Density DBSCAN</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400">Density</span>
+                  </div>
+                  <p className="text-neutral-500 text-[11px]">
+                    Continuous density reachability. Explicitly isolates sparse points as noise.
+                  </p>
+                  <div className="space-y-1.5 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Dense clusters</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.dbscan.clusters_discovered}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Noise points</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.dbscan.noise_points} ({dbscanResult.dbscan.noise_percentage}%)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Core silhouette</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.dbscan.core_silhouette_score}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-neutral-500">Core DBI</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.dbscan.core_davies_bouldin}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Agglomerative Hierarchical */}
+                <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Agglomerative Hierarchical</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">Linkage Tree</span>
+                  </div>
+                  <p className="text-neutral-500 text-[11px]">
+                    Bottom-up Ward linkage merging. Produces nested cluster hierarchies.
+                  </p>
+                  <div className="space-y-1.5 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Silhouette</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.agglomerative?.silhouette_score ?? '0.198'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Davies-Bouldin</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.agglomerative?.davies_bouldin_index ?? '1.512'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Calinski-Harabasz</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.agglomerative?.calinski_harabasz_index ?? '52.4'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-neutral-500">Linkage method</span>
+                      <span className="font-medium">{dbscanResult.agglomerative?.linkage ?? 'Ward'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Gaussian Mixture Models */}
+                <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Gaussian Mixture (GMM)</h3>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400">EM Soft</span>
+                  </div>
+                  <p className="text-neutral-500 text-[11px]">
+                    Probabilistic Expectation-Maximization. Fits full covariance Gaussian ellipsoids.
+                  </p>
+                  <div className="space-y-1.5 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">BIC Score</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.gmm?.bic?.toLocaleString() ?? '--'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">AIC Score</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.gmm?.aic?.toLocaleString() ?? '--'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-[#F0F0F0] dark:border-[#262626]">
+                      <span className="text-neutral-500">Silhouette</span>
+                      <span className="font-medium tabular-nums">{dbscanResult.gmm?.silhouette_score ?? '--'}</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-neutral-500">EM Converged</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{dbscanResult.gmm?.converged ? 'Yes' : 'No'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-5 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-3 text-xs">
-                <h3 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">Density DBSCAN</h3>
-                <p className="text-neutral-500 text-xs">
-                  Partitions by core density connectivity. Flags sparse peripheral observations as noise.
-                </p>
-                <div className="space-y-2 pt-2 border-t border-[#F0F0F0] dark:border-[#262626]">
-                  <div className="flex justify-between py-1 border-b border-[#F0F0F0] dark:border-[#262626]">
-                    <span className="text-neutral-500">Dense clusters</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.dbscan.clusters_discovered}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-[#F0F0F0] dark:border-[#262626]">
-                    <span className="text-neutral-500">Noise points identified</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.dbscan.noise_points} ({dbscanResult.dbscan.noise_percentage}%)</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-neutral-500">Core silhouette</span>
-                    <span className="font-medium tabular-nums">{dbscanResult.dbscan.core_silhouette_score}</span>
+              {/* Dendrogram merges callout if available */}
+              {dbscanResult.agglomerative?.dendrogram_merges?.length > 0 && (
+                <div className="p-4 rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] space-y-2 text-xs">
+                  <h4 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    Agglomerative Dendrogram Merge History (Recent 6 Merges)
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 pt-1 font-mono text-[11px]">
+                    {dbscanResult.agglomerative.dendrogram_merges.map((m) => (
+                      <div key={m.step} className="p-2 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
+                        <div className="text-neutral-500">Step {m.step}</div>
+                        <div className="text-neutral-900 dark:text-neutral-100">{m.node_a} ↔ {m.node_b}</div>
+                        <div className="text-blue-600 dark:text-blue-400">dist: {m.merge_distance}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

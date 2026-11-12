@@ -24,6 +24,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional, List
 
+import pandas as pd
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -40,6 +42,8 @@ from experiment_engine import (
     run_cluster_stability,
     run_comprehensive_benchmark,
     run_dbscan_vs_kmeans_comparison,
+    run_hierarchical_clustering_lab,
+    run_gmm_lab,
     explain_anomaly_observation,
     evaluate_concept_drift,
     experiment_store,
@@ -420,6 +424,42 @@ def api_dbscan_comparison(req: DBSCANComparisonRequest):
     return res
 
 
+class HierarchicalLabRequest(BaseModel):
+    n_clusters: int = 3
+    linkage: str = "ward"
+    sample_size: int = 300
+
+
+@app.post("/api/experiments/hierarchical-clustering")
+def api_hierarchical_clustering(req: HierarchicalLabRequest):
+    """Run Agglomerative Hierarchical Clustering with linkage and dendrogram merges."""
+    res = run_hierarchical_clustering_lab(
+        n_clusters=req.n_clusters,
+        linkage=req.linkage,
+        sample_size=req.sample_size,
+    )
+    experiment_store.save_experiment(res)
+    return res
+
+
+class GMMLabRequest(BaseModel):
+    min_components: int = 2
+    max_components: int = 8
+    sample_size: int = 500
+
+
+@app.post("/api/experiments/gmm-lab")
+def api_gmm_lab(req: GMMLabRequest):
+    """Run Gaussian Mixture Models across component range evaluating BIC, AIC, and log-likelihood."""
+    res = run_gmm_lab(
+        min_components=req.min_components,
+        max_components=req.max_components,
+        sample_size=req.sample_size,
+    )
+    experiment_store.save_experiment(res)
+    return res
+
+
 @app.get("/api/experiments/history")
 def api_list_experiments():
     """Retrieve history of all persisted Experiment Studio runs."""
@@ -494,6 +534,8 @@ def api_concept_drift(window_size: int = 100):
 
         df_curr = pd.DataFrame([r.to_dict() for r in reversed(readings)])
         drift_res = evaluate_concept_drift(df_curr)
+        if "status" not in drift_res:
+            drift_res["status"] = "DRIFT_DETECTED" if drift_res.get("overall_drift_detected") else "STABLE"
         return drift_res
     finally:
         db.close()

@@ -26,9 +26,10 @@ import joblib
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-from sklearn.cluster import DBSCAN, MiniBatchKMeans
+from sklearn.cluster import AgglomerativeClustering, DBSCAN, MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
+from sklearn.mixture import GaussianMixture
 from sklearn.metrics import (
     adjusted_rand_score,
     calinski_harabasz_score,
@@ -981,6 +982,7 @@ def run_dbscan_vs_kmeans_comparison(
 
     km_sil = float(silhouette_score(X_sub, km_labels))
     km_db = float(davies_bouldin_score(X_sub, km_labels))
+    km_ch = float(calinski_harabasz_score(X_sub, km_labels))
 
     # 2. DBSCAN
     t0_db = time.perf_counter()
@@ -996,11 +998,43 @@ def run_dbscan_vs_kmeans_comparison(
     if len(core_clusters) > 1 and np.sum(non_noise_mask) > 10:
         db_sil = float(silhouette_score(X_sub[non_noise_mask], db_labels[non_noise_mask]))
         db_dbi = float(davies_bouldin_score(X_sub[non_noise_mask], db_labels[non_noise_mask]))
+        db_ch  = float(calinski_harabasz_score(X_sub[non_noise_mask], db_labels[non_noise_mask]))
     else:
-        db_sil, db_dbi = 0.0, 0.0
+        db_sil, db_dbi, db_ch = 0.0, 0.0, 0.0
+
+    # 3. Agglomerative Hierarchical Clustering (Linkage & Dendrogram analysis)
+    t0_agg = time.perf_counter()
+    agg = AgglomerativeClustering(n_clusters=k, linkage="ward", compute_distances=True)
+    agg_labels = agg.fit_predict(X_sub)
+    agg_ms = (time.perf_counter() - t0_agg) * 1000
+    agg_sil = float(silhouette_score(X_sub, agg_labels))
+    agg_db  = float(davies_bouldin_score(X_sub, agg_labels))
+    agg_ch  = float(calinski_harabasz_score(X_sub, agg_labels))
+
+    # Dendrogram merge summary (last 6 hierarchical merges)
+    top_merges = []
+    if hasattr(agg, "distances_") and agg.distances_ is not None:
+        for idx_m, (children, dist) in enumerate(zip(agg.children_[-6:], agg.distances_[-6:])):
+            top_merges.append({
+                "step": idx_m + 1,
+                "node_a": int(children[0]),
+                "node_b": int(children[1]),
+                "merge_distance": round(float(dist), 3),
+            })
+
+    # 4. Gaussian Mixture Models (Soft Probabilistic EM Clustering)
+    t0_gmm = time.perf_counter()
+    gmm = GaussianMixture(n_components=k, covariance_type="full", random_state=random_seed)
+    gmm_labels = gmm.fit_predict(X_sub)
+    gmm_ms = (time.perf_counter() - t0_gmm) * 1000
+    gmm_sil = float(silhouette_score(X_sub, gmm_labels)) if len(np.unique(gmm_labels)) > 1 else 0.0
+    gmm_db  = float(davies_bouldin_score(X_sub, gmm_labels)) if len(np.unique(gmm_labels)) > 1 else 0.0
+    gmm_ch  = float(calinski_harabasz_score(X_sub, gmm_labels)) if len(np.unique(gmm_labels)) > 1 else 0.0
+    gmm_bic = float(gmm.bic(X_sub))
+    gmm_aic = float(gmm.aic(X_sub))
 
     return {
-        "experiment_id": f"EXP-DBSCAN-KM-{uuid.uuid4().hex[:8]}",
+        "experiment_id": f"EXP-CMP-{uuid.uuid4().hex[:8]}",
         "sample_size": len(X_sub),
         "kmeans": {
             "paradigm": "Centroid-based geometric partitioning",
@@ -1008,6 +1042,7 @@ def run_dbscan_vs_kmeans_comparison(
             "duration_ms": round(km_ms, 2),
             "silhouette_score": round(km_sil, 4),
             "davies_bouldin_index": round(km_db, 4),
+            "calinski_harabasz_index": round(km_ch, 2),
             "inertia": round(float(km.inertia_), 2),
             "clusters_discovered": k,
             "noise_handling": "Forces all points into nearest centroid (no noise class)",
@@ -1021,13 +1056,138 @@ def run_dbscan_vs_kmeans_comparison(
             "noise_percentage": round(noise_count / len(X_sub) * 100, 2),
             "core_silhouette_score": round(db_sil, 4),
             "core_davies_bouldin": round(db_dbi, 4),
+            "core_calinski_harabasz": round(db_ch, 2),
             "noise_handling": "Explicit noise class (-1) for low-density spatial outliers",
         },
+        "agglomerative": {
+            "paradigm": "Hierarchical bottom-up tree merging (Ward linkage)",
+            "k": k,
+            "linkage": "ward",
+            "duration_ms": round(agg_ms, 2),
+            "silhouette_score": round(agg_sil, 4),
+            "davies_bouldin_index": round(agg_db, 4),
+            "calinski_harabasz_index": round(agg_ch, 2),
+            "dendrogram_merges": top_merges,
+        },
+        "gmm": {
+            "paradigm": "Expectation-Maximization soft probabilistic clustering",
+            "n_components": k,
+            "duration_ms": round(gmm_ms, 2),
+            "bic": round(gmm_bic, 2),
+            "aic": round(gmm_aic, 2),
+            "silhouette_score": round(gmm_sil, 4),
+            "davies_bouldin_index": round(gmm_db, 4),
+            "calinski_harabasz_index": round(gmm_ch, 2),
+            "converged": bool(gmm.converged_),
+        },
         "comparative_insights": [
-            "K-Means enforces spherical clusters and assigns every observation to a regime.",
-            "DBSCAN allows arbitrary manifold shapes and explicitly tags peripheral points as noise.",
-            f"At eps={eps}, DBSCAN isolated {noise_count} points as spatial anomalies.",
+            "K-Means enforces spherical partitions and assigns every observation to a regime.",
+            "DBSCAN detects arbitrary density structures and explicitly isolates low-density noise.",
+            "Agglomerative Clustering builds a hierarchical tree revealing progressive merge thresholds.",
+            "Gaussian Mixture Model fits full covariance ellipsoids with soft posterior regime probabilities."
         ],
+    }
+
+
+def run_hierarchical_clustering_lab(
+    n_clusters: int = 3,
+    linkage: str = "ward",
+    sample_size: int = 300,
+    random_seed: int = 42,
+) -> Dict[str, Any]:
+    """
+    Evaluates Agglomerative Hierarchical Clustering with linkage tree extraction.
+    """
+    healthy_path = os.path.join(DATA_DIR, "baseline_healthy.csv")
+    df_h = pd.read_csv(healthy_path)
+    X = compute_features_batch(df_h).values
+    scaler = StandardScaler().fit(X)
+    X_s = scaler.transform(X)
+
+    rng = np.random.default_rng(random_seed)
+    idx = rng.choice(len(X_s), size=min(sample_size, len(X_s)), replace=False)
+    X_sub = X_s[idx]
+
+    t0 = time.perf_counter()
+    agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage, compute_distances=True)
+    labels = agg.fit_predict(X_sub)
+    duration_ms = (time.perf_counter() - t0) * 1000
+
+    sil = float(silhouette_score(X_sub, labels))
+    dbi = float(davies_bouldin_score(X_sub, labels))
+    chi = float(calinski_harabasz_score(X_sub, labels))
+
+    merges = []
+    if hasattr(agg, "distances_") and agg.distances_ is not None:
+        for idx_m, (children, dist) in enumerate(zip(agg.children_[-12:], agg.distances_[-12:])):
+            merges.append({
+                "step": idx_m + 1,
+                "node_a": int(children[0]),
+                "node_b": int(children[1]),
+                "distance": round(float(dist), 3)
+            })
+
+    cluster_counts = [int(np.sum(labels == c)) for c in range(n_clusters)]
+
+    return {
+        "experiment_id": f"EXP-HIER-{uuid.uuid4().hex[:8]}",
+        "n_clusters": n_clusters,
+        "linkage": linkage,
+        "sample_size": len(X_sub),
+        "duration_ms": round(duration_ms, 2),
+        "silhouette_score": round(sil, 4),
+        "davies_bouldin_index": round(dbi, 4),
+        "calinski_harabasz_index": round(chi, 2),
+        "cluster_distribution": cluster_counts,
+        "dendrogram_merges": merges,
+    }
+
+
+def run_gmm_lab(
+    min_components: int = 2,
+    max_components: int = 8,
+    sample_size: int = 500,
+    random_seed: int = 42,
+) -> Dict[str, Any]:
+    """
+    Evaluates Gaussian Mixture Models across component range with BIC, AIC, and log-likelihood.
+    """
+    healthy_path = os.path.join(DATA_DIR, "baseline_healthy.csv")
+    df_h = pd.read_csv(healthy_path)
+    X = compute_features_batch(df_h).values
+    scaler = StandardScaler().fit(X)
+    X_s = scaler.transform(X)
+
+    rng = np.random.default_rng(random_seed)
+    idx = rng.choice(len(X_s), size=min(sample_size, len(X_s)), replace=False)
+    X_sub = X_s[idx]
+
+    components_results = []
+    for k in range(min_components, max_components + 1):
+        t0 = time.perf_counter()
+        gmm = GaussianMixture(n_components=k, covariance_type="full", random_state=random_seed, max_iter=100)
+        labels = gmm.fit_predict(X_sub)
+        dur = (time.perf_counter() - t0) * 1000
+
+        bic = float(gmm.bic(X_sub))
+        aic = float(gmm.aic(X_sub))
+        log_lik = float(gmm.score(X_sub))
+        sil = float(silhouette_score(X_sub, labels)) if len(np.unique(labels)) > 1 else 0.0
+
+        components_results.append({
+            "k": k,
+            "bic": round(bic, 2),
+            "aic": round(aic, 2),
+            "log_likelihood": round(log_lik, 4),
+            "silhouette_score": round(sil, 4),
+            "duration_ms": round(dur, 2),
+            "converged": bool(gmm.converged_),
+        })
+
+    return {
+        "experiment_id": f"EXP-GMM-{uuid.uuid4().hex[:8]}",
+        "sample_size": len(X_sub),
+        "results": components_results,
     }
 
 

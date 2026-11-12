@@ -23,6 +23,8 @@ backend/__pycache__/
 *.sqlite
 *.sqlite3
 backend/skyguard.db
+backend/experiments/*.json
+backend/models/station_calibration.json
 
 # OS & Editor files
 .DS_Store
@@ -30,3 +32,4 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+

@@ -369,23 +369,20 @@ class LivePipelineManager:
             }
         }
 
-        # Save snapshot
-        snap_path = os.path.join(MODELS_DIR, "analytics_snapshot.json")
-        with open(snap_path, "w") as f:
-            json.dump(self.analytics_snapshot, f, indent=2)
+        # Persist station-specific calibration snapshot (do NOT overwrite baseline analytics_snapshot.json)
+        station_snap_path = os.path.join(MODELS_DIR, "station_calibration.json")
+        try:
+            with open(station_snap_path, "w") as f:
+                json.dump(self.analytics_snapshot, f, indent=2)
+        except Exception as e:
+            print(f"[Pipeline] Notice: could not write station_calibration.json: {e}")
 
-        # Store models
+        # Store models in memory for live streaming without clobbering baseline model artifacts
         self.scaler = scaler
         self.iforest = iforest
         self.lof = lof
         self.kmeans = kmeans
         self.pca = pca
-
-        joblib.dump(scaler, os.path.join(MODELS_DIR, "scaler.joblib"))
-        joblib.dump(iforest, os.path.join(MODELS_DIR, "isolation_forest.joblib"))
-        joblib.dump(lof, os.path.join(MODELS_DIR, "lof.joblib"))
-        joblib.dump(kmeans, os.path.join(MODELS_DIR, "kmeans.joblib"))
-        joblib.dump(pca, os.path.join(MODELS_DIR, "pca.joblib"))
 
         # Pre-warm streaming buffer with last 10 historical rows
         self.extractor.reset()
@@ -446,6 +443,11 @@ class LivePipelineManager:
             "drift_accum": 0.0
         }
         self.extractor.reset()
+        self.scaler = None
+        self.iforest = None
+        self.lof = None
+        self.kmeans = None
+        self.pca = None
 
         # Clean database tables
         db = SessionLocal()

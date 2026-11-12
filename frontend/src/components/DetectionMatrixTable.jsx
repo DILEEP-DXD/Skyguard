@@ -58,14 +58,19 @@ export default function DetectionMatrixTable({ detection = {} }) {
   };
 
   return (
-    <div className="rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] p-5 overflow-x-auto">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#F0F0F0] dark:border-[#262626]">
+    <div className="rounded-xl border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#171718] p-5 overflow-x-auto space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#F0F0F0] dark:border-[#262626]">
         <div>
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-            Algorithm detection benchmark
-          </h2>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Precision and recall evaluated against the controlled hardware fault injection benchmark suite.
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              Post-hoc external benchmark
+            </h2>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+              Unseen labels · Validation only
+            </span>
+          </div>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+            Zero ground-truth fault labels were accessible during model training or hyperparameter selection. Precision and recall are evaluated strictly post-hoc on a held-out benchmark suite.
           </p>
         </div>
       </div>

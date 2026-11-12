@@ -53,7 +53,8 @@ from sklearn.cluster import DBSCAN, MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.manifold import TSNE
-from sklearn.metrics import davies_bouldin_score, silhouette_score
+from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
+from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import StandardScaler
 
@@ -208,7 +209,7 @@ def train_and_save(X_healthy_raw: pd.DataFrame) -> dict:
     print(f"    done in {time.time()-t0:.2f}s  |  inertia={kmeans.inertia_:.2f}")
     _save(kmeans, "kmeans.joblib")
 
-    # 3e. PCA
+    # 3e. PCA (2-D projection for real-time inference)
     print("  Fitting PCA (n_components=2) …")
     pca = PCA(n_components=2, random_state=RNG_SEED)
     pca.fit(X_scaled)
@@ -217,12 +218,102 @@ def train_and_save(X_healthy_raw: pd.DataFrame) -> dict:
           f"total={sum(evr)*100:.1f}%")
     _save(pca, "pca.joblib")
 
+    # 3f. 12-Component PCA Scree Analysis & Feature Loadings
+    print("  Computing full 12-component PCA Scree Analysis & Loadings …")
+    pca_full = PCA(n_components=X_scaled.shape[1], random_state=RNG_SEED)
+    pca_full.fit(X_scaled)
+    evr_full = [round(float(v), 4) for v in pca_full.explained_variance_ratio_]
+    cum_var = [round(float(v), 4) for v in np.cumsum(pca_full.explained_variance_ratio_)]
+    eigenvalues = [round(float(v), 4) for v in pca_full.explained_variance_]
+
+    top_pc1 = sorted(
+        [{"feature": feat, "loading": round(float(val), 4)} for feat, val in zip(FEATURE_NAMES, pca_full.components_[0])],
+        key=lambda x: abs(x["loading"]),
+        reverse=True,
+    )
+    top_pc2 = sorted(
+        [{"feature": feat, "loading": round(float(val), 4)} for feat, val in zip(FEATURE_NAMES, pca_full.components_[1])],
+        key=lambda x: abs(x["loading"]),
+        reverse=True,
+    )
+    pca_scree = {
+        "n_components": len(evr_full),
+        "explained_variance_ratio": evr_full,
+        "cumulative_variance_ratio": cum_var,
+        "eigenvalues": eigenvalues,
+        "top_loadings_pc1": top_pc1,
+        "top_loadings_pc2": top_pc2,
+    }
+
+    # Sample for stable intrinsic validation sweeps
+    rng_sweep = np.random.default_rng(RNG_SEED)
+    sweep_sample_n = min(2000, len(X_scaled))
+    idx_sweep = rng_sweep.choice(len(X_scaled), size=sweep_sample_n, replace=False)
+    X_sweep = X_scaled[idx_sweep]
+
+    # 3g. K-Means Optimal K Justification Sweep (k=2..10)
+    print("  Running K-Means Optimal K sweep (k=2..10) on healthy baseline …")
+    elbow_curve = []
+    for k in range(2, 11):
+        km_k = MiniBatchKMeans(
+            n_clusters=k,
+            init="k-means++",
+            n_init=10,
+            random_state=RNG_SEED,
+            batch_size=512,
+        )
+        km_k.fit(X_scaled)
+        preds_k = km_k.predict(X_sweep)
+        sil = float(silhouette_score(X_sweep, preds_k))
+        db = float(davies_bouldin_score(X_sweep, preds_k))
+        ch = float(calinski_harabasz_score(X_sweep, preds_k))
+        elbow_curve.append({
+            "k": k,
+            "wcss": round(float(km_k.inertia_), 2),
+            "silhouette": round(sil, 4),
+            "davies_bouldin": round(db, 4),
+            "calinski_harabasz": round(ch, 2),
+        })
+
+    # 3h. Gaussian Mixture Models (BIC/AIC curve k=2..8 & Primary Fit)
+    print("  Running GMM BIC/AIC component sweep (k=2..8) …")
+    gmm_curve = []
+    for k in range(2, 9):
+        gmm_k = GaussianMixture(
+            n_components=k,
+            covariance_type="full",
+            random_state=RNG_SEED,
+            max_iter=100,
+        )
+        gmm_k.fit(X_sweep)
+        bic = float(gmm_k.bic(X_sweep))
+        aic = float(gmm_k.aic(X_sweep))
+        gmm_curve.append({
+            "k": k,
+            "bic": round(bic, 2),
+            "aic": round(aic, 2),
+        })
+
+    print("  Training primary GaussianMixture (n_components=3) …")
+    gmm = GaussianMixture(
+        n_components=3,
+        covariance_type="full",
+        random_state=RNG_SEED,
+        max_iter=150,
+    )
+    gmm.fit(X_scaled)
+    _save(gmm, "gmm.joblib")
+
     return {
-        "scaler":  scaler,
-        "iforest": iforest,
-        "lof":     lof,
-        "kmeans":  kmeans,
-        "pca":     pca,
+        "scaler":      scaler,
+        "iforest":     iforest,
+        "lof":         lof,
+        "kmeans":      kmeans,
+        "pca":         pca,
+        "gmm":         gmm,
+        "elbow_curve": elbow_curve,
+        "gmm_curve":   gmm_curve,
+        "pca_scree":   pca_scree,
     }
 
 
@@ -265,6 +356,7 @@ def build_analytics_snapshot(
     lof     = models["lof"]
     kmeans  = models["kmeans"]
     pca     = models["pca"]
+    gmm     = models["gmm"]
 
     X_scaled = scaler.transform(X_sample_raw)
 
@@ -288,6 +380,9 @@ def build_analytics_snapshot(
     print("  Running MiniBatchKMeans predict …")
     kmeans_labels = kmeans.predict(X_scaled).tolist()
 
+    print("  Running GaussianMixture predict …")
+    gmm_labels = gmm.predict(X_scaled).tolist()
+
     print(f"  Running DBSCAN (eps={DBSCAN_EPS}, min_samples={DBSCAN_MIN_SAMPLES}) …")
     dbscan = DBSCAN(eps=DBSCAN_EPS, min_samples=DBSCAN_MIN_SAMPLES, n_jobs=-1)
     dbscan_labels = dbscan.fit_predict(X_scaled).tolist()
@@ -303,18 +398,58 @@ def build_analytics_snapshot(
     unique_km = np.unique(kmeans_labels)
     sil_km = float(silhouette_score(X_scaled, kmeans_labels)) if len(unique_km) > 1 else 0.0
     db_km  = float(davies_bouldin_score(X_scaled, kmeans_labels)) if len(unique_km) > 1 else 0.0
+    ch_km  = float(calinski_harabasz_score(X_scaled, kmeans_labels)) if len(unique_km) > 1 else 0.0
 
     # WCSS from the fitted MiniBatchKMeans baseline model
     wcss = float(kmeans.inertia_)
 
+    # DBSCAN intrinsic metrics
+    db_core_mask = np.array(dbscan_labels) != -1
+    n_db_clusters = len(set(dbscan_labels) - {-1})
+    noise_ratio = float(np.mean(np.array(dbscan_labels) == -1))
+    if n_db_clusters > 1 and np.sum(db_core_mask) > 10:
+        sil_db = float(silhouette_score(X_scaled[db_core_mask], np.array(dbscan_labels)[db_core_mask]))
+        db_db  = float(davies_bouldin_score(X_scaled[db_core_mask], np.array(dbscan_labels)[db_core_mask]))
+        ch_db  = float(calinski_harabasz_score(X_scaled[db_core_mask], np.array(dbscan_labels)[db_core_mask]))
+    else:
+        sil_db, db_db, ch_db = 0.0, 0.0, 0.0
+
+    # GMM intrinsic metrics
+    sil_gmm = float(silhouette_score(X_scaled, gmm_labels)) if len(np.unique(gmm_labels)) > 1 else 0.0
+    gmm_bic = float(gmm.bic(X_scaled))
+    gmm_aic = float(gmm.aic(X_scaled))
+
     metrics = {
-        "silhouette":    round(sil_km, 6),
-        "davies_bouldin": round(db_km, 6),
-        "wcss":           round(wcss, 4),
+        "silhouette":        round(sil_km, 6),
+        "davies_bouldin":    round(db_km, 6),
+        "calinski_harabasz": round(ch_km, 2),
+        "wcss":              round(wcss, 4),
+        "kmeans": {
+            "silhouette":        round(sil_km, 6),
+            "davies_bouldin":    round(db_km, 6),
+            "calinski_harabasz": round(ch_km, 2),
+            "wcss":              round(wcss, 4),
+        },
+        "dbscan": {
+            "silhouette":        round(sil_db, 6),
+            "davies_bouldin":    round(db_db, 6),
+            "calinski_harabasz": round(ch_db, 2),
+            "n_clusters":        int(n_db_clusters),
+            "noise_ratio":       round(float(noise_ratio), 4),
+        },
+        "gmm": {
+            "bic":          round(float(gmm_bic), 2),
+            "aic":          round(float(gmm_aic), 2),
+            "silhouette":   round(float(sil_gmm), 6),
+            "n_components": int(gmm.n_components),
+        }
     }
     print(f"    Silhouette={metrics['silhouette']:.4f}  "
           f"Davies-Bouldin={metrics['davies_bouldin']:.4f}  "
+          f"Calinski-Harabasz={metrics['calinski_harabasz']:.2f}  "
           f"WCSS={metrics['wcss']:.2f}")
+
+    kmeans_centroids_pca = pca.transform(kmeans.cluster_centers_).tolist()
 
     # ── 4d. Detection breakdown per fault type ────────────────────
     print("  Computing per-fault-type detection breakdown …")
@@ -342,16 +477,21 @@ def build_analytics_snapshot(
     # ── 4e. Assemble snapshot ─────────────────────────────────────
     snapshot = {
         "generated_at":  pd.Timestamp.now().isoformat(),
-        "n_points":      int(len(X_scaled)),
-        "pca_coords":    pca_coords,
-        "tsne_coords":   tsne_coords,
-        "kmeans_labels": kmeans_labels,
-        "dbscan_labels": dbscan_labels,
-        "if_labels":     if_labels,
-        "lof_labels":    lof_labels,
-        "fault_types":   fault_sample.tolist(),
-        "metrics":       metrics,
-        "detection":     detection,
+        "n_points":             int(len(X_scaled)),
+        "pca_coords":           pca_coords,
+        "tsne_coords":          tsne_coords,
+        "kmeans_labels":        kmeans_labels,
+        "dbscan_labels":        dbscan_labels,
+        "gmm_labels":           gmm_labels,
+        "if_labels":            if_labels,
+        "lof_labels":           lof_labels,
+        "fault_types":          fault_sample.tolist(),
+        "metrics":              metrics,
+        "elbow_curve":          models["elbow_curve"],
+        "gmm_curve":            models["gmm_curve"],
+        "pca_scree":            models["pca_scree"],
+        "kmeans_centroids_pca": kmeans_centroids_pca,
+        "detection":            detection,
     }
 
     snap_path = os.path.join(MODELS_DIR, "analytics_snapshot.json")
@@ -416,6 +556,7 @@ def main() -> None:
         "lof.joblib",
         "kmeans.joblib",
         "pca.joblib",
+        "gmm.joblib",
         "analytics_snapshot.json",
     ]
     all_ok = True
